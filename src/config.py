@@ -23,6 +23,8 @@ class Settings:
     embedding_model_name: str
 
     product_specs_collection: str
+    technical_specs_collection: str
+    refund_specs_collection: str
 
     chunk_size_tokens: int
     chunk_overlap_tokens: int
@@ -43,6 +45,8 @@ def _load_settings() -> Settings:
         weaviate_api_key=os.getenv("WEAVIATE_API_KEY") or None,
         embedding_model_name=os.getenv("EMBEDDING_MODEL_NAME", "BAAI/bge-base-en-v1.5"),
         product_specs_collection=os.getenv("PRODUCT_SPECS_COLLECTION", "product_specs"),
+        technical_specs_collection=os.getenv("TECHNICAL_SPECS_COLLECTION", "technical_specs"),
+        refund_specs_collection=os.getenv("REFUND_SPECS_COLLECTION", "refund_specs"),
         chunk_size_tokens=int(os.getenv("CHUNK_SIZE_TOKENS", "300")),
         chunk_overlap_tokens=int(os.getenv("CHUNK_OVERLAP_TOKENS", "40")),
         log_file_path=PROJECT_ROOT / os.getenv("LOG_FILE_PATH", "logs/ingestion.log"),

@@ -1,24 +1,25 @@
-"""Creates the product_specs collection (idempotent - reuses it if it
-already exists) with the 8 properties settled on in the ingestion plan:
-chunk_text, file_name, page_no, is_table, section_title, product_name,
-chunk_id, ingested_at.
+"""Creates a Weaviate collection (idempotent - reuses it if it already
+exists) with the 8 properties settled on in the ingestion plan: chunk_text,
+file_name, page_no, is_table, section_title, product_name, chunk_id,
+ingested_at.
 
 Vectorizer is explicitly "none": embeddings are computed client-side by
 src/embeddings/embedder.py, not by a Weaviate built-in module.
+
+This same 8-property shape is reused across all three collections
+(product_specs, technical_specs, refund_specs) - they differ only in name
+and source PDF(s), not in schema, so one function serves all three.
 """
 
 import weaviate
 import weaviate.classes.config as wc
 
-from src.config import settings
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
 
-def ensure_product_specs_collection(client: weaviate.WeaviateClient):
-    name = settings.product_specs_collection
-
+def ensure_collection(client: weaviate.WeaviateClient, name: str):
     if client.collections.exists(name):
         logger.info("Collection '%s' already exists - reusing it", name)
         return client.collections.get(name)

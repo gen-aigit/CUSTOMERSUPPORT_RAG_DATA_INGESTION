@@ -1,6 +1,9 @@
-"""End-to-end orchestration for the product_specs collection: load the PDF,
-parse it into sections, chunk each section's text and tables, embed, and
-upsert into Weaviate.
+"""End-to-end orchestration shared by all three collections
+(product_specs, technical_specs, refund_specs): load the PDF, parse it into
+sections, chunk each section's text and tables, embed, and upsert into
+whichever Weaviate collection the caller names. The loader/parser/chunkers
+don't know or care which collection they're feeding - only the collection
+name threads through, via ensure_collection().
 """
 
 from pathlib import Path
@@ -16,13 +19,13 @@ from src.utils.ids import build_chunk_id
 from src.utils.logger import get_logger
 from src.weaviate_store.client import weaviate_client
 from src.weaviate_store.ingestor import ingest_chunks
-from src.weaviate_store.schema import ensure_product_specs_collection
+from src.weaviate_store.schema import ensure_collection
 
 logger = get_logger(__name__)
 
 
-def run_product_specs_ingestion(pdf_path: Path) -> None:
-    logger.info("Starting product_specs ingestion for %s", pdf_path)
+def run_ingestion(pdf_path: Path, collection_name: str) -> None:
+    logger.info("Starting ingestion for %s -> collection '%s'", pdf_path, collection_name)
 
     elements = load_pdf_elements(pdf_path)
     sections = parse_sections(elements)
@@ -43,10 +46,10 @@ def run_product_specs_ingestion(pdf_path: Path) -> None:
     logger.info("Built %s chunk(s) from %s section(s)", len(chunks), len(sections))
 
     with weaviate_client() as client:
-        collection = ensure_product_specs_collection(client)
+        collection = ensure_collection(client, collection_name)
         ingest_chunks(collection, chunks, embedder)
 
-    logger.info("Finished product_specs ingestion for %s", pdf_path)
+    logger.info("Finished ingestion for %s -> collection '%s'", pdf_path, collection_name)
 
 
 def _build_chunks(sections: list[Section], file_name: str, token_length) -> list[Chunk]:
