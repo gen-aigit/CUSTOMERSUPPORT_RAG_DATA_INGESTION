@@ -1,0 +1,9 @@
+pdfplumber
+python-dotenv
+langchain
+langchain-text-splitters
+langchain-huggingface
+weaviate-client
+sentence-transformers
+transformers
+tenacity
