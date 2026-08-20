@@ -13,5 +13,4 @@ dist/
 # Logs
 logs/
 
-# Environment
-.env
+
